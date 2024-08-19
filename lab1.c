@@ -27,9 +27,9 @@ void inicializarVetor(int vetor[], int tamanho) {
     }
 }
 
-int verificarDiferenca(int *array1, int *array2, int tamanho) {
+int verificarDiferenca(int *vetor1, int *vetor2, int tamanho) {
     for (int i = 0; i < tamanho; i++) {
-        if (abs(array1[i] - array2[i]) != 1) {
+        if (abs(vetor1[i] - vetor2[i]) != 1) {
             return 1;
         }
     }
@@ -37,12 +37,9 @@ int verificarDiferenca(int *array1, int *array2, int tamanho) {
 }
 
 int main(int argc, char* argv[]) {
-    int *vetor;
+    int *vetor_alterado, *vetor_original, mthreads, nvetor, qtd_por_thread;
   
     t_Args *args;
-
-    int mthreads;
-    int qtd_por_thread, nvetor;
 
     if(argc < 3) {
         printf("ERRO: informe M e N");
@@ -51,10 +48,10 @@ int main(int argc, char* argv[]) {
 
     mthreads = atoi(argv[1]);
     nvetor = atoi(argv[2]);
-    vetor = (int *) malloc(nvetor * sizeof(int));
-    inicializarVetor(vetor, nvetor);
+    vetor_original = (int *) malloc(nvetor * sizeof(int));
+    inicializarVetor(vetor_original, nvetor);
 
-    int * vetor_original = vetor;
+    vetor_alterado = vetor_original;
 
     qtd_por_thread = nvetor / mthreads;
 
@@ -72,7 +69,7 @@ int main(int argc, char* argv[]) {
         else {
             args->qtd_elementos = qtd_por_thread;
         }
-        args->ptrInicial = vetor + (qtd_por_thread * i); 
+        args->ptrInicial = vetor_original + (qtd_por_thread * i); 
         
         if (pthread_create(&tid_sistema[i], NULL, SomarUm, (void*) args)) {
             printf("ERRO: pthread_create()\n"); 
@@ -86,7 +83,7 @@ int main(int argc, char* argv[]) {
         } 
     }
 
-    if (verificarDiferenca(vetor_original, vetor, nvetor)) {
+    if (verificarDiferenca(vetor_original, vetor_alterado, nvetor)) {
         printf("[CORRETO] A diferença entre todos os elementos nas mesmas posições é 1.\n");
     } else {
         printf("[ERRADO] A diferença entre os elementos nas mesmas posições não é 1.\n");
