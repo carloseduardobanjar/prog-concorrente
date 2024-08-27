@@ -33,7 +33,7 @@ Abaixo estão os resultados obtidos para diferentes tamanhos de vetor (usando 4 
 **Produto interno sequencial:** 2784974024,986  
 **Variação relativa**: 0.00000062369934994421782903  
 
-**Tamanho do vetor**: 1.000.0000  
+**Tamanho do vetor**: 1.000.000  
 **Produto interno concorrente**: 27701680128,00  
 **Produto interno sequencial:** 27702127664,796  
 **Variação relativa**: 0.00001615532164578326046467  
