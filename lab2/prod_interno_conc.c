@@ -5,7 +5,8 @@
 
 #include <stdio.h>
 #include <stdlib.h> 
-#include <pthread.h> 
+#include <pthread.h>
+#include <math.h>
 
 long int n;
 float *vetor1, *vetor2;
@@ -89,7 +90,7 @@ int main(int argc, char *argv[]) {
    }
 
    ret = fread(&prod_interno_seq, sizeof(double), 1, arq); 
-   var_relativa = (prod_interno_seq - prod_interno_global) / prod_interno_seq;
+   var_relativa = fabs((prod_interno_seq - prod_interno_global) / prod_interno_seq);
 
    printf("Produto interno concorrente: %.26f\n", prod_interno_global);
    printf("Produto interno sequencial: %.26lf\n", prod_interno_seq);
