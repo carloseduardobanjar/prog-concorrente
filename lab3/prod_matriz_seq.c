@@ -6,7 +6,7 @@
 
 float *matA, *matB, *matC;
 
-int le_arquivo(char *arquivo, float **matriz, int *rows, int *cols){
+int leMatrizBinario(char *arquivo, float **matriz, int *rows, int *cols){
    FILE * descritorArquivo;
    int ret, tam;
    descritorArquivo = fopen(arquivo, "rb");
@@ -69,8 +69,8 @@ int main(int argc, char* argv[]) {
    arquivo1 = argv[1];
    arquivo2 = argv[2];
 
-   le_arquivo(arquivo1, &matA, &rowsA, &colsA);
-   le_arquivo(arquivo2, &matB, &rowsB, &colsB);
+   leMatrizBinario(arquivo1, &matA, &rowsA, &colsA);
+   leMatrizBinario(arquivo2, &matB, &rowsB, &colsB);
 
    if (colsA != rowsB){
       printf("Dimensões incompatíveis\n");
