@@ -8,6 +8,8 @@
 
 long int soma = 0; //variavel compartilhada entre as threads
 pthread_mutex_t mutex; //variavel de lock para exclusao mutua
+pthread_cond_t cond; //variavel de condição para sincronização
+int printed = 0; //variável para verificar se o valor foi impresso
 
 //funcao executada pelas threads
 void *ExecutaTarefa (void *arg) {
@@ -17,8 +19,20 @@ void *ExecutaTarefa (void *arg) {
   for (int i=0; i<100000; i++) {
      //--entrada na SC
      pthread_mutex_lock(&mutex);
+
+     //--espera até que o múltiplo de 10 seja impresso
+     while (!printed && soma <= 190) {
+        pthread_cond_wait(&cond, &mutex);
+     }
+
      //--SC (seção critica)
      soma++; //incrementa a variavel compartilhada 
+
+     if (soma % 10 == 0) {
+        printed = 0; //marca que o valor não foi impresso
+        pthread_cond_signal(&cond); //notifica a thread extra
+     }
+
      //--saida da SC
      pthread_mutex_unlock(&mutex);
   }
@@ -29,9 +43,22 @@ void *ExecutaTarefa (void *arg) {
 //funcao executada pela thread de log
 void *extra (void *args) {
   printf("Extra : esta executando...\n");
-  for (int i=0; i<10000; i++) {
-     if (!(soma%10)) //imprime se 'soma' for multiplo de 10
-        printf("soma = %ld \n", soma);
+
+  for(int i=0; i<20;i++) { //imprimir os primeiros 20 múltiplos de 10
+     pthread_mutex_lock(&mutex);
+     
+     //--espera até que um múltiplo de 10 seja alcançado
+     while (printed) {
+        pthread_cond_wait(&cond, &mutex);
+     }
+     
+     //--imprime o múltiplo de 10
+     printf("soma = %ld \n", soma);
+     
+     printed = 1; //marca que o valor foi impresso
+     pthread_cond_broadcast(&cond); //sinaliza todas as threads para continuar
+     
+     pthread_mutex_unlock(&mutex);
   }
   printf("Extra : terminou!\n");
   pthread_exit(NULL);
@@ -55,6 +82,7 @@ int main(int argc, char *argv[]) {
 
    //--inicilaiza o mutex (lock de exclusao mutua)
    pthread_mutex_init(&mutex, NULL);
+   pthread_cond_init(&cond, NULL);
 
    //--cria as threads
    for(long int t=0; t<nthreads; t++) {
@@ -75,8 +103,9 @@ int main(int argc, char *argv[]) {
      } 
    } 
 
-   //--finaliza o mutex
+  //--finaliza o mutex
    pthread_mutex_destroy(&mutex);
+   pthread_cond_destroy(&cond);
    
    printf("Valor de 'soma' = %ld\n", soma);
 
