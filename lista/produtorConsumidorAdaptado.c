@@ -6,7 +6,6 @@
 #define nthread_produtor 1
 
 int contador = 0;
-int head = 0;
 int tail = 0;
 int buffer[N];
 pthread_cond_t terVaga;
@@ -18,29 +17,32 @@ void * Produz(void*arg){
     for(int i=0; i<50;i++){
         itemASerInserido = i;
         pthread_mutex_lock(&mutex);
-        while(contador == N){
+        while(contador != 0){
             pthread_cond_wait(&terVaga, &mutex);
         }
-        contador++;
-        buffer[head] = itemASerInserido;
-        printf("Produz %d\n", itemASerInserido);
-        head = (head + 1) % N;
+        contador = N;
+        for(int i=0;i<N;i++){
+            buffer[i] = itemASerInserido;
+            printf("Produz %d\n", itemASerInserido);
+        }
         pthread_mutex_unlock(&mutex);
-        pthread_cond_signal(&terItem);    
+        pthread_cond_broadcast(&terItem);    
     }
     pthread_exit(NULL);
 }
 
 void * Consome(void*arg){
     int itemASerRemovido;
-    for(int i=0; i<10;i++){
+    long int id;
+    id = (long int) arg;
+    for(int i=0; i<50;i++){
         pthread_mutex_lock(&mutex);
         while(contador == 0){
             pthread_cond_wait(&terItem, &mutex);
         }
         contador--;
         itemASerRemovido = buffer[tail];
-        printf("Consome %d\n", itemASerRemovido);
+        printf("Consome %d (thread %ld)\n", itemASerRemovido, id);
         tail = (tail + 1) % N;
         pthread_mutex_unlock(&mutex);
         pthread_cond_signal(&terVaga);
@@ -61,8 +63,8 @@ int main(void){
         pthread_create(&tid_produz[i], NULL, Produz, NULL);
     }
 
-    for(int i=0;i<nthread_consumidor;i++){
-        pthread_create(&tid_consome[i], NULL, Consome, NULL);
+    for(long int i=0;i<nthread_consumidor;i++){
+        pthread_create(&tid_consome[i], NULL, Consome, (void *)i);
     }
 
     for(int i=0;i<nthread_produtor;i++){
