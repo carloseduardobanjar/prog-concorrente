@@ -24,6 +24,9 @@ void *Insere (void*) {
     {
         sem_wait(&slotVazioBuffer1); // Espera o Buffer 1 ficar completamente vazio
         result = fgets(buffer1, N, arq);  // Lê um chunk do arquivo e armazena no Buffer 1
+        if (result == NULL) {  // Se chegou ao fim do arquivo
+            buffer1[0] = '\0';
+        }
         sem_post(&slotCheioBuffer1); // Avisa que o Buffer 1 está cheio (Thread 2)
     }
     fclose(arq);
